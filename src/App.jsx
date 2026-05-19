@@ -1,61 +1,5 @@
-import { useState, useEffect } from "react";
-
-// ── WORD BANK ─────────────────────────────────────────────────────────────────
-const WORD_BANK = [
-  // EMOTIONS
-  { word:"Jubilant",     cat:"emotions",   meaning:"Feeling great happiness and triumph",              sentence:"The ___ children cheered when school was cancelled.",            hint:"Jubilee → celebration",            synonyms:["elated","overjoyed","exultant"],          antonyms:["miserable","dejected","sorrowful"] },
-  { word:"Melancholy",   cat:"emotions",   meaning:"A deep feeling of pensive sadness",                sentence:"A ___ tune drifted from the old piano.",                         hint:"Melan = black (Greek)",             synonyms:["sorrowful","gloomy","wistful"],            antonyms:["cheerful","elated","joyful"] },
-  { word:"Forlorn",      cat:"emotions",   meaning:"Pitifully sad and abandoned",                      sentence:"The ___ puppy sat alone in the rain.",                           hint:"For + lorn = utterly lost",         synonyms:["miserable","wretched","desolate"],         antonyms:["content","cheerful","hopeful"] },
-  { word:"Indignant",    cat:"emotions",   meaning:"Feeling anger at unfair treatment",                sentence:"She was ___ when her essay was given to someone else.",           hint:"Indig = unworthy treatment",        synonyms:["outraged","furious","resentful"],          antonyms:["pleased","content","calm"] },
-  { word:"Apprehensive", cat:"emotions",   meaning:"Anxious or fearful about the future",              sentence:"He felt ___ before his first day at the new school.",             hint:"Apprehend = grasp with dread",      synonyms:["anxious","uneasy","worried"],              antonyms:["confident","reassured","calm"] },
-  { word:"Elated",       cat:"emotions",   meaning:"Extremely happy and excited",                      sentence:"She was ___ when she heard she had passed the exam.",             hint:"Elate = lift up",                   synonyms:["overjoyed","jubilant","thrilled"],         antonyms:["dejected","miserable","gloomy"] },
-  { word:"Remorseful",   cat:"emotions",   meaning:"Filled with deep regret for wrongdoing",           sentence:"The boy felt truly ___ after breaking his sister's toy.",         hint:"Re + morse = bite again (guilt)",   synonyms:["guilty","repentant","contrite"],           antonyms:["unrepentant","shameless","proud"] },
-  { word:"Serene",       cat:"emotions",   meaning:"Calm, peaceful and untroubled",                    sentence:"The ___ lake reflected the mountains like a mirror.",             hint:"Serene sounds like 'clear'",        synonyms:["tranquil","peaceful","placid"],            antonyms:["agitated","turbulent","anxious"] },
-  { word:"Wistful",      cat:"emotions",   meaning:"Having a feeling of vague longing",                sentence:"She gazed with a ___ look at the old photographs.",               hint:"Wist = pensive longing",            synonyms:["nostalgic","pensive","yearning"],          antonyms:["content","satisfied","cheerful"] },
-  { word:"Vexed",        cat:"emotions",   meaning:"Annoyed or frustrated",                            sentence:"The ___ teacher tapped her foot and waited for silence.",         hint:"Vex = irritate",                    synonyms:["annoyed","irritated","frustrated"],        antonyms:["calm","pleased","content"] },
-  // CHARACTER
-  { word:"Benevolent",   cat:"character",  meaning:"Kind, generous and well-meaning",                  sentence:"The ___ queen shared her feast with the whole village.",           hint:"Bene = good (Latin)",               synonyms:["kind","generous","charitable"],            antonyms:["malevolent","cruel","selfish"] },
-  { word:"Diligent",     cat:"character",  meaning:"Showing careful and consistent effort",             sentence:"The ___ pupil checked all her answers twice.",                    hint:"Diligence = hard work",             synonyms:["industrious","hardworking","assiduous"],   antonyms:["lazy","idle","negligent"] },
-  { word:"Zealous",      cat:"character",  meaning:"Having great energy or enthusiasm",                 sentence:"The ___ student studied every evening for the exam.",             hint:"Zeal = passionate effort",          synonyms:["enthusiastic","fervent","keen"],           antonyms:["apathetic","indifferent","lukewarm"] },
-  { word:"Impulsive",    cat:"character",  meaning:"Acting quickly without thinking first",             sentence:"His ___ decision to climb the fence got him into trouble.",       hint:"Im + pulse = act on impulse",       synonyms:["reckless","hasty","spontaneous"],          antonyms:["cautious","deliberate","restrained"] },
-  { word:"Tenacious",    cat:"character",  meaning:"Very determined; not giving up easily",             sentence:"The ___ climber refused to turn back despite the storm.",         hint:"Tenac = holding on tightly",        synonyms:["persistent","resolute","determined"],      antonyms:["weak-willed","irresolute","feeble"] },
-  { word:"Prudent",      cat:"character",  meaning:"Acting with care and thought for the future",       sentence:"It was ___ to save money rather than spend it all at once.",      hint:"Prudent = wise planning",           synonyms:["sensible","careful","judicious"],          antonyms:["reckless","foolish","imprudent"] },
-  { word:"Audacious",    cat:"character",  meaning:"Showing a willingness to take bold risks",          sentence:"The ___ explorer sailed into uncharted waters alone.",             hint:"Aud = dare (Latin)",                synonyms:["bold","daring","fearless"],                antonyms:["timid","cowardly","cautious"] },
-  { word:"Indolent",     cat:"character",  meaning:"Wanting to avoid work or effort; lazy",             sentence:"The ___ boy left all his chores until the very last moment.",     hint:"In + dolent = without pain/effort", synonyms:["lazy","idle","sluggish"],                  antonyms:["diligent","industrious","energetic"] },
-  { word:"Candid",       cat:"character",  meaning:"Truthful and straightforward",                      sentence:"He gave a ___ answer even though it was hard to hear.",           hint:"Candid = white/pure (Latin)",       synonyms:["frank","honest","direct"],                 antonyms:["evasive","dishonest","deceitful"] },
-  { word:"Scrupulous",   cat:"character",  meaning:"Very careful and thorough; having strong principles",sentence:"The ___ scientist recorded every detail of her experiment.",     hint:"Scruple = a tiny doubt or concern", synonyms:["meticulous","principled","conscientious"], antonyms:["careless","dishonest","sloppy"] },
-  // ACTIONS
-  { word:"Abolish",      cat:"actions",    meaning:"To formally put an end to something",               sentence:"The government decided to ___ the unfair law.",                   hint:"Ab + vanish",                       synonyms:["eliminate","eradicate","annul"],           antonyms:["establish","create","introduce"] },
-  { word:"Deduce",       cat:"actions",    meaning:"To reach a conclusion through reasoning",            sentence:"The detective could ___ who had stolen the jewels.",              hint:"De + reduce to facts",              synonyms:["infer","conclude","reason"],               antonyms:["assume","guess","speculate"] },
-  { word:"Persevere",    cat:"actions",    meaning:"To continue despite difficulty or delay",            sentence:"You must ___ even when the task feels impossible.",               hint:"Per = through + severe",            synonyms:["persist","endure","continue"],             antonyms:["quit","give up","surrender"] },
-  { word:"Conceal",      cat:"actions",    meaning:"To prevent something from being known or seen",      sentence:"He tried to ___ the broken vase behind the curtain.",             hint:"Con + ceal = cover up",             synonyms:["hide","disguise","mask"],                  antonyms:["reveal","expose","disclose"] },
-  { word:"Elaborate",    cat:"actions",    meaning:"To explain something in more detail",                sentence:"The teacher asked him to ___ on his answer.",                     hint:"Labour = work through in detail",   synonyms:["expand","explain","detail"],               antonyms:["simplify","summarise","condense"] },
-  { word:"Lament",       cat:"actions",    meaning:"To feel or express great sorrow or regret",          sentence:"He would ___ the loss of his favourite book for years.",          hint:"Lament = cry about",                synonyms:["mourn","grieve","bewail"],                 antonyms:["celebrate","rejoice","revel"] },
-  { word:"Dispel",       cat:"actions",    meaning:"To make a feeling or belief disappear",              sentence:"Her calm words helped ___ his fears about the dark.",             hint:"Dis + pel = drive away",            synonyms:["banish","dismiss","scatter"],              antonyms:["create","instil","foster"] },
-  { word:"Ponder",       cat:"actions",    meaning:"To think about something carefully",                 sentence:"She sat by the window to ___ the strange events of the day.",    hint:"Pon = weigh in the mind",           synonyms:["contemplate","reflect","muse"],            antonyms:["ignore","dismiss","react"] },
-  { word:"Coerce",       cat:"actions",    meaning:"To persuade someone by force or threats",            sentence:"He tried to ___ the younger children into giving up their lunch.", hint:"Co + erce = force together",       synonyms:["force","compel","intimidate"],             antonyms:["persuade","encourage","invite"] },
-  { word:"Scrutinise",   cat:"actions",    meaning:"To examine or inspect closely",                      sentence:"The scientist began to ___ the strange rock under her microscope.",hint:"Scrutiny = close inspection",      synonyms:["examine","inspect","analyse"],             antonyms:["ignore","overlook","glance"] },
-  // DESCRIBING
-  { word:"Ominous",      cat:"describing", meaning:"Suggesting something bad is about to happen",        sentence:"Dark ___ clouds gathered above the castle.",                      hint:"Omen = bad sign",                   synonyms:["threatening","foreboding","sinister"],     antonyms:["reassuring","promising","hopeful"] },
-  { word:"Treacherous",  cat:"describing", meaning:"Guilty of betrayal; dangerously unstable",           sentence:"The ___ path over the mountain was covered in ice.",              hint:"Treason = betrayal = dangerous",    synonyms:["dangerous","hazardous","deceitful"],       antonyms:["safe","loyal","trustworthy"] },
-  { word:"Vivid",        cat:"describing", meaning:"Producing powerful feelings; intensely bright",       sentence:"She had a ___ imagination that painted pictures in her mind.",   hint:"Viv = life = lively, bright",       synonyms:["striking","dazzling","bold"],              antonyms:["dull","pale","faded"] },
-  { word:"Ambiguous",    cat:"describing", meaning:"Open to more than one interpretation; unclear",       sentence:"The riddle was so ___ that nobody could agree on the answer.",   hint:"Ambi = both; could go either way",  synonyms:["unclear","vague","cryptic"],               antonyms:["clear","definite","unambiguous"] },
-  { word:"Notorious",    cat:"describing", meaning:"Famous for something bad or shameful",                sentence:"The ___ pirate was feared across the seven seas.",                hint:"Notori + ous = known for bad",      synonyms:["infamous","disreputable","scandalous"],    antonyms:["unknown","reputable","honourable"] },
-  { word:"Ferocious",    cat:"describing", meaning:"Fierce and violently intense",                        sentence:"The ___ lion roared loudly across the savannah.",                hint:"Ferocious = fierce",                synonyms:["fierce","savage","brutal"],                antonyms:["gentle","tame","mild"] },
-  { word:"Eloquent",     cat:"describing", meaning:"Fluent and persuasive in speech or writing",          sentence:"Her ___ speech moved the whole audience to tears.",              hint:"Eloq = speak out well",             synonyms:["articulate","expressive","fluent"],        antonyms:["inarticulate","mumbling","tongue-tied"] },
-  { word:"Immense",      cat:"describing", meaning:"Extremely large or great",                            sentence:"The explorer felt ___ excitement as she neared the treasure.",   hint:"Im + mense = beyond measure",       synonyms:["vast","enormous","colossal"],              antonyms:["tiny","minute","negligible"] },
-  { word:"Desolate",     cat:"describing", meaning:"Bleak, empty and without comfort",                    sentence:"The ___ moor stretched for miles without a single house.",        hint:"De + solate = utterly alone",       synonyms:["barren","bleak","deserted"],               antonyms:["lush","vibrant","populated"] },
-  { word:"Sinister",     cat:"describing", meaning:"Suggesting evil or harm; menacing",                   sentence:"A ___ shadow fell across the door just before midnight.",         hint:"Sinister = left-side (seen as bad in Latin)", synonyms:["menacing","malevolent","ominous"],  antonyms:["benign","harmless","innocent"] },
-  // SYNONYMS FOCUS
-  { word:"Cautious",     cat:"synonyms",   meaning:"Careful to avoid danger or mistakes",                 sentence:"She was ___ when crossing the busy road.",                        hint:"Caution = careful",                 synonyms:["wary","careful","prudent"],                antonyms:["reckless","careless","impulsive"] },
-  { word:"Hostile",      cat:"synonyms",   meaning:"Unfriendly and aggressive",                           sentence:"The ___ crowd booed the visiting team.",                          hint:"Host gone wrong!",                  synonyms:["aggressive","belligerent","antagonistic"],  antonyms:["friendly","welcoming","amicable"] },
-  { word:"Reluctant",    cat:"synonyms",   meaning:"Unwilling and hesitant to do something",              sentence:"He was ___ to admit that he had made a mistake.",                hint:"Re + luctant = pulling back",       synonyms:["unwilling","hesitant","loath"],            antonyms:["eager","willing","enthusiastic"] },
-  { word:"Sincere",      cat:"synonyms",   meaning:"Genuine; truly meaning what you say",                 sentence:"Her ___ apology made everyone feel better.",                     hint:"Sine = without wax (no faking!)",   synonyms:["genuine","heartfelt","honest"],            antonyms:["insincere","fake","dishonest"] },
-  { word:"Brisk",        cat:"synonyms",   meaning:"Active, quick and full of energy",                    sentence:"They set off at a ___ pace to beat the rain.",                    hint:"Brisk = crisp and fast",            synonyms:["lively","energetic","quick"],              antonyms:["slow","sluggish","lethargic"] },
-  { word:"Furtive",      cat:"synonyms",   meaning:"Attempting to avoid notice; secretive",               sentence:"He cast a ___ glance over his shoulder before opening the door.", hint:"Furtive = sneaky, like a thief",   synonyms:["secretive","stealthy","sly"],              antonyms:["open","transparent","brazen"] },
-  { word:"Gloomy",       cat:"synonyms",   meaning:"Dark and dull; causing sadness",                      sentence:"On the ___ winter morning, nobody wanted to go outside.",         hint:"Sounds like gloom",                 synonyms:["dismal","bleak","dreary"],                 antonyms:["bright","cheerful","sunny"] },
-  { word:"Peculiar",     cat:"synonyms",   meaning:"Strange or unusual",                                  sentence:"There was a ___ smell coming from the old attic.",               hint:"Peculiar = belonging to oneself (odd)", synonyms:["strange","odd","bizarre"],             antonyms:["ordinary","normal","typical"] },
-];
+import { useState, useEffect, useRef } from "react";
+import WORD_BANK from "./words.json";
 
 const CATS = [
   { id:"all",       label:"All Words",       icon:"📚", color:"#ffd77a" },
@@ -143,17 +87,25 @@ const inpStyle = { width:"100%", boxSizing:"border-box", padding:"13px 15px", bo
 function BottomNav({tab, onTab}) {
   const tabs = [{id:"home",icon:"🗺️",label:"Quest"},{id:"tricky",icon:"⭐",label:"Tricky"},{id:"parent",icon:"👨‍👩‍👧",label:"Parent"}];
   return (
-    <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:420,
-      background:"rgba(15,12,41,.96)",backdropFilter:"blur(16px)",borderTop:"1px solid rgba(255,200,100,.2)",
-      display:"flex",zIndex:100,paddingBottom:"env(safe-area-inset-bottom,6px)"}}>
-      {tabs.map(t => (
-        <button key={t.id} onClick={()=>onTab(t.id)} style={{flex:1,background:"none",border:"none",padding:"10px 0 6px",
-          cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-          <span style={{fontSize:22}}>{t.icon}</span>
-          <span style={{fontSize:11,color:tab===t.id?gold:muted,fontWeight:tab===t.id?"bold":"normal",fontFamily:"Georgia,serif"}}>{t.label}</span>
-          {tab===t.id && <div style={{width:20,height:2,borderRadius:2,background:gold,marginTop:2}}/>}
-        </button>
-      ))}
+    <div style={{
+      position:"fixed", bottom:0, left:0, right:0,
+      background:"rgba(15,12,41,.97)",
+      backdropFilter:"blur(16px)",
+      borderTop:"1px solid rgba(255,200,100,.2)",
+      display:"flex", justifyContent:"center",
+      zIndex:1000,
+      paddingBottom:"env(safe-area-inset-bottom,6px)",
+    }}>
+      <div style={{display:"flex", width:"100%", maxWidth:420}}>
+        {tabs.map(t => (
+          <button key={t.id} onClick={()=>onTab(t.id)} style={{flex:1,background:"none",border:"none",padding:"10px 0 6px",
+            cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+            <span style={{fontSize:22}}>{t.icon}</span>
+            <span style={{fontSize:11,color:tab===t.id?gold:muted,fontWeight:tab===t.id?"bold":"normal",fontFamily:"Georgia,serif"}}>{t.label}</span>
+            {tab===t.id && <div style={{width:20,height:2,borderRadius:2,background:gold,marginTop:2}}/>}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -202,6 +154,7 @@ export default function VocabQuest() {
   const [words,      setWords]     = useState([]);
   const [idx,        setIdx]       = useState(0);
   const [answers,    setAnswers]   = useState([]);
+  const answersRef = useRef([]);  // always in sync, safe to read in callbacks
   const [sessXP,     setSessXP]    = useState(0);
   const [revealed,   setRevealed]  = useState(false);
   const [fillVal,    setFillVal]   = useState("");
@@ -245,6 +198,7 @@ export default function VocabQuest() {
     // Pre-attach shuffled options for fill-in-the-blank multiple choice
     const withOpts = wlist.map(w=>{ const {options,close}=buildOptions(w,quizType,WORD_BANK); return {...w,_options:options,_close:close}; });
     setMode(m); setWords(withOpts); setIdx(0); setAnswers([]); setSessXP(0);
+    answersRef.current = [];
     setRevealed(false); setFillVal(""); setFillRes(null); setShowHint(false);
     setExplanation(""); setExplLoading(false); setNoteOpen(false);
     setPhase("play");
@@ -287,6 +241,8 @@ export default function VocabQuest() {
     setFillRes(correct?"correct":"wrong");
     const g=getXPFor(correct), newA=[...answers,correct?"correct":"wrong"];
     setSessXP(sessXP+g);
+    setAnswers(newA);
+    answersRef.current = newA;
 
     // Fetch AI explanation
     setExplanation(""); setExplLoading(true);
@@ -319,11 +275,22 @@ Keep it encouraging and use simple language a 10-year-old will understand.`;
 
   const getFillTarget = () => quizType==="meaning"?cur.word:quizType==="synonym"?cur.synonyms?.[0]:cur.antonyms?.[0];
 
-  const hdrStyle = { width:"100%",maxWidth:420,zIndex:1,background:"rgba(255,255,255,.05)",backdropFilter:"blur(12px)",
-    borderBottom:"1px solid rgba(255,200,100,.2)",padding:"12px 18px 10px",display:"flex",alignItems:"center",justifyContent:"space-between" };
-  const wrap = { width:"100%",maxWidth:420,zIndex:1,padding:"0 16px" };
-  const appWrap = { minHeight:"100vh",background:"linear-gradient(160deg,#0f0c29 0%,#302b63 50%,#24243e 100%)",
-    fontFamily:"Georgia,serif",color:textCol,display:"flex",flexDirection:"column",alignItems:"center",paddingBottom:80 };
+  const hdrStyle = {
+    position:"fixed", top:0, left:0, right:0, zIndex:999,
+    background:"rgba(15,12,41,.97)", backdropFilter:"blur(12px)",
+    borderBottom:"1px solid rgba(255,200,100,.2)",
+    padding:"12px 18px 10px",
+    display:"flex", alignItems:"center", justifyContent:"space-between",
+  };
+  const wrap = { width:"100%", maxWidth:420, zIndex:1, padding:"0 16px" };
+  const appWrap = {
+    minHeight:"100vh",
+    background:"linear-gradient(160deg,#0f0c29 0%,#302b63 50%,#24243e 100%)",
+    fontFamily:"Georgia,serif", color:textCol,
+    display:"flex", flexDirection:"column", alignItems:"center",
+    paddingTop:64,   // clear the fixed header (~64px tall)
+    paddingBottom:80, // clear the fixed bottom nav
+  };
 
   // ══════════════════════════════════════════════════════════════════════════
   // HOME — MENU
@@ -333,7 +300,7 @@ Keep it encouraging and use simple language a 10-year-old will understand.`;
       <div style={hdrStyle}>
         <div>
           <div style={{fontSize:18,fontWeight:"bold",color:gold,letterSpacing:1}}>📖 Vocab Quest</div>
-          <div style={{fontSize:11,color:muted}}>11+ Grammar Prep</div>
+          {/* <div style={{fontSize:11,color:muted}}>Your Vocabulary friend</div>*/}
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:13,color:"#ffb74d"}}>🔥 {streak}</span>
@@ -480,7 +447,8 @@ Keep it encouraging and use simple language a 10-year-old will understand.`;
     const catObj=CATS.find(c=>c.id===cur.cat)||CATS[0];
     const isTricky=tricky.includes(cur.word);
     const target=getFillTarget();
-    const parts = quizType==="meaning" ? (cur.sentence||"___").split("___") : ["",""];
+    const rawParts = quizType==="meaning" ? (cur.sentence||"").split("___") : ["",""];
+    const parts = [rawParts[0]||"", rawParts[1]||""];
     const options = cur._options || [];
 
     // Determine button state after selection
@@ -545,7 +513,7 @@ Keep it encouraging and use simple language a 10-year-old will understand.`;
                   <span style={{display:"inline-block",borderBottom:`2px solid ${gold}`,minWidth:90,
                     color: fillRes ? (fillRes==="correct"?"#a5d6a7":"#ef9a9a") : gold,
                     fontStyle:"normal",fontWeight:"bold",padding:"0 6px",transition:"color .3s"}}>
-                    {fillVal || "___"}
+                    {fillVal || "\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0"}
                   </span>
                   {parts[1]}
                 </div>
@@ -698,9 +666,10 @@ Keep it encouraging and use simple language a 10-year-old will understand.`;
                   if(idx+1<words.length){
                     setIdx(idx+1); setRevealed(false); setFillVal(""); setFillRes(null); setShowHint(false);
                   } else {
+                    const finalAnswers = answersRef.current;
                     const newXP=xp+sessXP; saveXP(newXP); saveStr(streak+1);
                     const rec={date:new Date().toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}),
-                      cat:selCat,mode,quizType,correct:answers.filter(a=>a==="correct").length,total:words.length,xp:sessXP};
+                      cat:selCat,mode,quizType,correct:finalAnswers.filter(a=>a==="correct").length,total:words.length,xp:sessXP};
                     saveHist([...history,rec]); setPhase("summary");
                   }
                 }}>
@@ -719,7 +688,8 @@ Keep it encouraging and use simple language a 10-year-old will understand.`;
   // SUMMARY
   // ══════════════════════════════════════════════════════════════════════════
   if(nav==="home" && phase==="summary") {
-    const correct=answers.filter(a=>a==="correct").length;
+    const finalAnswers = answersRef.current.length > 0 ? answersRef.current : answers;
+    const correct=finalAnswers.filter(a=>a==="correct").length;
     const pct=Math.round((correct/words.length)*100);
     const stars=pct>=90?3:pct>=60?2:1;
     return (
@@ -745,7 +715,7 @@ Keep it encouraging and use simple language a 10-year-old will understand.`;
             <div style={{fontSize:13,color:muted,marginBottom:8,textAlign:"center"}}>Word Review — tap ☆ to save for practice</div>
             {words.map((w,i)=>(
               <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"9px 0",borderBottom:"1px solid rgba(255,255,255,.06)"}}>
-                <span style={{fontSize:16,marginTop:2}}>{answers[i]==="correct"?"✅":"❌"}</span>
+                <span style={{fontSize:16,marginTop:2}}>{finalAnswers[i]==="correct"?"✅":"❌"}</span>
                 <div style={{flex:1}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <span style={{fontWeight:"bold",color:gold,fontSize:15}}>{w.word}</span>
